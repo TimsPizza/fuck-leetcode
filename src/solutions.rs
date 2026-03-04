@@ -361,3 +361,99 @@ pub fn merge(mut intervals: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
     }
     ans
 }
+
+pub fn insert(intervals: Vec<Vec<i32>>, mut new_interval: Vec<i32>) -> Vec<Vec<i32>> {
+    let mut i = 0usize;
+    let n = intervals.len();
+    let mut ans: Vec<Vec<i32>> = Vec::new();
+    while i < n && new_interval[0] > intervals[i][1] {
+        ans.push(intervals[i].clone());
+        i += 1;
+    }
+    while i < n && new_interval[1] >= intervals[i][0] {
+        new_interval[0] = new_interval[0].min(intervals[i][0]);
+        new_interval[1] = new_interval[1].max(intervals[i][1]);
+        i += 1;
+    }
+    ans.push(new_interval);
+    while i < n {
+        ans.push(intervals[i].clone());
+        i += 1;
+    }
+    ans
+}
+
+pub fn length_of_last_word(s: String) -> i32 {
+    let mut i = 0;
+    let it_c = s.trim().chars().into_iter();
+    for c in it_c.rev() {
+        if c.is_whitespace() {
+            break;
+        }
+        i += 1;
+    }
+    i
+}
+
+pub fn generate_matrix(n: i32) -> Vec<Vec<i32>> {
+    let mut ans: Vec<Vec<i32>> = vec![vec!(0; n as usize); n as usize];
+    let mut num = 1;
+    let (mut t, mut l, mut r, mut b) = (0usize, 0usize, n as usize, n as usize);
+    while t < b && l < r {
+        // top row
+        for i in l..r {
+            ans[t][i] = num;
+            num += 1;
+        }
+        t += 1;
+        for i in t..b {
+            ans[i][r - 1] = num;
+            num += 1;
+        }
+        r -= 1;
+        for i in (l..r).rev() {
+            ans[b - 1][i] = num;
+            num += 1;
+        }
+        b -= 1;
+        for i in (t..b).rev() {
+            ans[i][l] = num;
+            num += 1;
+        }
+        l += 1
+    }
+
+    ans
+}
+
+pub fn get_permutation(n: i32, k: i32) -> String {
+    let fac: Vec<u32> = vec![1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880];
+    let mut available: Vec<u32> = (1..n as u32 + 1).collect();
+    let mut ans: Vec<char> = Vec::new();
+    fn solve(
+        n: i32,
+        digit: u32,
+        round: u32,
+        available: &mut Vec<u32>,
+        fac: &Vec<u32>,
+        ans: &mut Vec<char>,
+    ) {
+        if digit == n as u32 {
+            return;
+        }
+        let base = fac[available.len() - 1] as u32;
+        let offset = (round / base) as usize;
+        let d = available.remove(offset);
+        ans.push(char::from_digit(d, 10).unwrap());
+        solve(
+            n,
+            digit + 1,
+            round - offset as u32 * base,
+            available,
+            fac,
+            ans,
+        )
+    }
+    solve(n, 0, (k as u32) - 1, &mut available, &fac, &mut ans);
+    ans.iter().collect()
+}
