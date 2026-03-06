@@ -457,3 +457,50 @@ pub fn get_permutation(n: i32, k: i32) -> String {
     solve(n, 0, (k as u32) - 1, &mut available, &fac, &mut ans);
     ans.iter().collect()
 }
+pub fn rotate_right(mut head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
+    let mut len = 0;
+    if head.is_none() || head.as_ref().unwrap().next.is_none() {
+        return head;
+    }
+    {
+        let mut h_ref = head.as_ref();
+        while let Some(nd) = h_ref {
+            len += 1;
+            h_ref = nd.next.as_ref();
+        }
+    }
+    let normalize = k % len;
+    if normalize == 0 {
+        return head;
+    }
+    // find new tail and cut
+    let mut new_tail = head.as_mut().unwrap();
+    for _ in 0..len - normalize - 1 {
+        new_tail = new_tail.next.as_mut().unwrap();
+    }
+    let mut new_head = new_tail.next.take();
+    let mut tail = new_head.as_mut().unwrap();
+    while tail.next.is_some() {
+        tail = tail.next.as_mut().unwrap();
+    }
+    tail.next = head.take();
+    new_head
+}
+
+pub fn unique_paths(m: i32, n: i32) -> i32 {
+    let rows = m as usize;
+    let cols = n as usize;
+    let mut dp: Vec<Vec<i32>> = vec![vec![0; cols]; rows]; //row-col
+    for i in 0..rows {
+        dp[i][0] = 1;
+    }
+    for i in 0..cols {
+        dp[0][i] = 1;
+    }
+    for c in 1..cols {
+        for r in 1..rows {
+            dp[r][c] = dp[r - 1][c] + dp[r][c - 1];
+        }
+    }
+    dp[rows - 1][cols - 1]
+}
