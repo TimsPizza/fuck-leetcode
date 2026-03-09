@@ -1,5 +1,5 @@
 use std::{
-    cmp::max,
+    cmp::{Reverse, max},
     collections::{self, HashMap, HashSet},
     i32::MAX,
     num, string,
@@ -503,4 +503,88 @@ pub fn unique_paths(m: i32, n: i32) -> i32 {
         }
     }
     dp[rows - 1][cols - 1]
+}
+
+pub fn unique_paths_with_obstacles(obstacle_grid: Vec<Vec<i32>>) -> i32 {
+    let mut cols = obstacle_grid[0].len();
+    let mut rows = obstacle_grid.len();
+    let mut dp: Vec<Vec<i32>> = vec![vec![0; cols]; rows]; //row-col
+    {
+        let mut i = 0;
+        while i < cols && obstacle_grid[0][i] == 0 {
+            dp[0][i] = 1;
+            i += 1;
+        }
+        i = 0;
+        while i < rows && obstacle_grid[i][0] == 0 {
+            dp[i][0] = 1;
+            i += 1;
+        }
+    }
+    for c in 1..cols {
+        for r in 1..rows {
+            dp[r][c] = if obstacle_grid[r][c] == 1 {
+                0
+            } else {
+                dp[r - 1][c] + dp[r][c - 1]
+            }
+        }
+    }
+    dp[rows - 1][cols - 1]
+}
+
+pub fn min_path_sum(grid: Vec<Vec<i32>>) -> i32 {
+    let rows = grid.len();
+    let cols = grid[0].len();
+    let mut dp: Vec<Vec<i32>> = vec![vec![2147483647; cols]; rows];
+    dp[0][0] = grid[0][0];
+    for c in 1..cols {
+        dp[0][c] = dp[0][c - 1] + grid[0][c];
+    }
+    for r in 1..rows {
+        dp[r][0] = dp[r - 1][0] + grid[r][0];
+    }
+    for c in 1..cols {
+        for r in 1..rows {
+            dp[r][c] = grid[r][c] + dp[r - 1][c].min(dp[r][c - 1]);
+        }
+    }
+    dp[rows - 1][cols - 1]
+}
+
+pub fn is_number(s: String) -> bool {
+    let mut seen_digit = false;
+    let mut seen_exp = false;
+    let mut seen_dot = false;
+    let bytes = s.as_bytes();
+    for (i, c) in s.char_indices() {
+        match c {
+            'E' | 'e' => {
+                if seen_exp || !seen_digit {
+                    return false;
+                }
+                seen_exp = true;
+                seen_digit = false; // reset
+            }
+
+            '+' | '-' => {
+                if i > 0 && !bytes[i - 1].eq_ignore_ascii_case(&b'e') {
+                    return false;
+                }
+            }
+            '.' => {
+                if seen_dot || seen_exp {
+                    return false;
+                }
+                seen_dot = true;
+            }
+            c if c.is_numeric() => {
+                seen_digit = true;
+            }
+            _ => {
+                return false;
+            }
+        }
+    }
+    seen_digit
 }
